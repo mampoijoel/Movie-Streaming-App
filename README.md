@@ -1,69 +1,128 @@
-# StreamBox - JavaFX Movie Streaming Demo
+# StreamBox – JavaFX Movie Streaming Demo
 
-Netflix-style demo app (JavaFX 21). Trailers stream from YouTube inside the app; no video files are stored.
+**Course:** B/DIIM3110 – Interactive Multimedia  
+**Project:** Group Assignment
 
-## Setup (VS Code, "No build tools" project)
+StreamBox is a JavaFX movie streaming application inspired by Netflix. It provides a user-friendly interface where users can browse movies by category and watch trailers directly inside the application using YouTube.
 
-1. Install **JDK 17+** and the VS Code *Extension Pack for Java*.
-2. Download the **JavaFX 21 SDK** from https://gluonhq.com/products/javafx/ and copy its contents into the `javafx-sdk/` folder
-   (you should end up with `javafx-sdk/lib/javafx.base.jar` etc.). See `javafx-sdk/README.txt`. It is git-ignored, so each member does this once.
-3. Open the project folder in VS Code, wait for Java to load, then press **F5** (Run > "StreamBox").
-   If red squiggles remain on `javafx` imports: Ctrl+Shift+P > "Java: Clean Java Language Server Workspace".
+The application is developed using JavaFX 21. Trailers stream from YouTube, so no video files are stored locally.
 
-An internet connection is needed. Controls: click a thumbnail to play - Space play/pause - Esc or Back to close - arrows or horizontal swipe to scroll a row.
+## 1. Setup (VS Code – No Build Tools)
 
-## Project layout
+1. Install **JDK 17 or later** and the VS Code **Extension Pack for Java**.
+2. Download the **JavaFX 21 SDK** from [Gluon JavaFX](https://gluonhq.com/products/javafx/).
+3. Copy the JavaFX SDK contents into the `javafx-sdk/` folder.
+   - You should have files such as `javafx-sdk/lib/javafx.base.jar`.
+   - See `javafx-sdk/README.txt` for more information.
+   - The SDK is Git-ignored, so each group member must download it separately.
+4. Open the project folder in VS Code.
+5. Wait for Java to load, then press **F5** to run the application.
 
+If red squiggly lines remain under JavaFX imports, press `Ctrl + Shift + P`, select **Java: Clean Java Language Server Workspace**, and restart VS Code.
+
+An internet connection is required to stream trailers.
+
+### Application Controls
+- Click a movie thumbnail to play its trailer.
+- Press Space to play or pause.
+- Press Esc or click Back to close the player.
+- Use the arrow keys or horizontal scrolling to browse movie categories.
+
+## 2. Project Structure
+
+```text
+Movie-Streaming-App/
+│
+├── .gitignore
+├── README.md
+├── javafx-sdk/
+│   └── README.txt
+│
+└── src/
+    ├── com/streamdemo/
+    │   ├── MainApp.java
+    │   │
+    │   ├── model/
+    │   │   ├── Movie.java
+    │   │   ├── Category.java
+    │   │   └── Catalog.java
+    │   │
+    │   ├── ui/
+    │   │   ├── HomeView.java
+    │   │   ├── HeroBanner.java
+    │   │   ├── NavBar.java
+    │   │   ├── CategoryRow.java
+    │   │   ├── MovieCard.java
+    │   │   ├── CustomButton.java
+    │   │   ├── SeekBar.java
+    │   │   ├── LoadingAnimation.java
+    │   │   ├── PlayerView.java
+    │   │   └── Icons.java
+    │   │
+    │   ├── player/
+    │   │   └── PlayerServer.java
+    │   │
+    │   └── audio/
+    │       └── SoundManager.java
+    │
+    ├── player.html
+    └── style.css
 ```
-src/com/streamdemo/
-  MainApp.java            app start-up, wiring, keyboard shortcuts
-  model/                  Movie, Category, Catalog (3 genres x 8 movies)
-  ui/
-    HomeView              scrolling home page
-    HeroBanner            featured banner
-    NavBar                logo, category links, sound switch
-    CategoryRow           labelled row, 5 visible thumbnails + smooth scroll
-    MovieCard             thumbnail + title, hover effect
-    CustomButton          our own button (StackPane + Label, NOT javafx Button)
-    SeekBar               custom progress/seek bar
-    LoadingAnimation      custom "loading trailer" animation
-    PlayerView            trailer player (WebView + custom controls)
-    Icons                 vector icons drawn with shapes
-  player/PlayerServer     tiny localhost server for the YouTube page
-  audio/SoundManager      synthesised sound effects (no audio files)
-src/                      player.html (YouTube IFrame API page), style.css
-```
 
-## How the requirements are met
+## 3. How the Project Meets the Requirements
 
-| Requirement | Where |
+| Requirement | Implementation |
 |---|---|
-| 3+ categories, 8+ movies each, labelled | `Catalog`, `CategoryRow` header |
-| Thumbnail + title | `MovieCard` |
-| Hover effect | `MovieCard` (grow, glow, zoom, play badge, sound) |
-| Only 5 visible, scroll for the rest | `CategoryRow` (card width = viewport / 5) |
-| Trailer plays from YouTube inside the app | `PlayerView` + `PlayerServer` + `player.html` |
-| Play / pause | `PlayerView.togglePlayback()` -> JS `streamApi` |
-| Custom loading animation | `LoadingAnimation` |
-| No `Button` class | `CustomButton`, arrows in `CategoryRow`, `SeekBar` |
-| Sound effects | `SoundManager` (hover, click, open, close) |
+| Three or more movie categories | Catalog and CategoryRow |
+| At least eight movies per category | Catalog |
+| Movie thumbnails and titles | MovieCard |
+| Hover effects | MovieCard |
+| Five visible thumbnails at a time | CategoryRow |
+| Horizontal scrolling | CategoryRow |
+| Trailer playback inside the application | PlayerView, PlayerServer and player.html |
+| Play and pause controls | PlayerView |
+| Custom loading animation | LoadingAnimation |
+| Custom buttons | CustomButton |
+| Sound effects | SoundManager |
 
-## How the player works (for the demo / viva)
+## 4. How the Video Player Works
 
-YouTube blocks embeds that have no web origin, so `PlayerServer` serves `player.html` from `http://localhost:<port>`.
-That page loads the YouTube IFrame API with its own controls hidden. Java calls `window.streamApi.play()/pause()/seek()` via
-`WebEngine.executeScript`, and the page reports state back through the `javaBridge` object (`PlayerView.Bridge`).
-The loading animation stays until YouTube reports the "playing" state; if there is an error or a 20 s timeout, a
-"Watch on YouTube" fallback button opens the trailer in the browser.
+YouTube blocks some embedded videos when they have no web origin. To solve this, PlayerServer creates a small local server that serves `player.html` from localhost.
 
-## Changing a trailer
+The HTML page loads the YouTube IFrame API with its default controls hidden.
 
-Edit `Catalog.java`: replace the YouTube id (the part after `watch?v=`). If a trailer shows "owner does not allow playing inside other apps",
-use another upload of that trailer.
+Java communicates with the webpage using `WebEngine.executeScript()` to control playback, pause and seek functions.
 
-## Git workflow (10 + 15 marks depend on this)
+The webpage also communicates with Java through the `javaBridge` object.
 
-- `main` is protected: nobody commits to it directly. Work in feature branches, merge by pull request.
-- Suggested split, so every member has real commits: **A** model + CategoryRow/MovieCard (layout, scrolling) -
-  **B** hover effects, CustomButton, LoadingAnimation, CSS/theme - **C** PlayerView, PlayerServer, player.html - **D** SoundManager, NavBar, HeroBanner, README.
-- Commit small and often with clear messages (`Add hover glow to MovieCard`), and make sure each member can explain the classes they own.
+The loading animation remains visible until YouTube reports that playback has started. If an error occurs or the video takes longer than 20 seconds to load, a fallback button allows users to open the trailer on YouTube.
+
+## 5. Changing a Movie Trailer
+
+To change a movie trailer:
+
+1. Open `Catalog.java`.
+2. Locate the movie you want to update.
+3. Replace its YouTube video ID with the ID of another trailer.
+4. Save the file and run the application again.
+
+The YouTube ID is the part that appears after `watch?v=` in a YouTube video link.
+
+Some YouTube videos do not allow playback inside other applications. If this happens, use another trailer upload.
+
+## 6. GitHub Collaboration and Workflow
+
+The project is managed using Git and GitHub to support group collaboration.
+
+The `main` branch is protected. Members should work using individual feature branches and submit pull requests when their work is ready for review.
+
+### Suggested Group Task Distribution
+
+- **Member A:** Movie model, CategoryRow and MovieCard.
+- **Member B:** Hover effects, CustomButton, LoadingAnimation and CSS/theme.
+- **Member C:** PlayerView, PlayerServer and player.html.
+- **Member D:** SoundManager, NavBar, HeroBanner and README documentation.
+
+Each member should:
+- Make regular commits with meaningful messages.
+- Work
