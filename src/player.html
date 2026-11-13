@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <style>
+        html, body { margin: 0; height: 100%; background: #000; overflow: hidden; }
+        #player { width: 100%; height: 100%; }
+    </style>
+</head>
+<body>
+<div id="player"></div>
+<script>
+    // ---- messages to the JavaFX app (queued until the Java bridge is attached) ----
+    var queue = [];
+    function notify(name, arg) {
+        if (window.javaBridge) {
+            try { window.javaBridge[name](String(arg)); } catch (e) {}
+        } else {
+            queue.push([name, arg]);
+        }
+    }
+    window.flushBridge = function () {
+        while (queue.length) {
+            var q = queue.shift();
+            notify(q[0], q[1]);
+        }
+    };
+
+    // ---- commands from the JavaFX app (custom play/pause/seek controls) ----
+    var player;
+    window.streamApi = {
+        play: function () { if (player) player.playVideo(); },
+        pause: function () { if (player) player.pauseVideo(); },
+        seek: function (fraction) {
+            if (player && player.getDuration() > 0) player.seekTo(player.getDuration() * fraction, true);
+        },
+        progress: function () {
+            if (player && player.getDuration && player.getDuration() > 0) {
+                return player.getCurrentTime() / player.getDuration();
+            }
+            return 0;
+        }
+    };
+
+    // ---- YouTube IFrame Player API ----
+    function onYouTubeIframeAPIReady() {
+        player = new YT.Player('player', {
+            videoId: '%VIDEO_ID%',
+            width: '100%',
+            height: '100%',
+            playerVars: {
+                autoplay: 1, controls: 0, rel: 0, modestbranding: 1,
+                playsinline: 1, fs: 0, iv_load_policy: 3, disablekb: 1,
+                origin: location.origin
+            },
+            events: {
+                onReady: function (e) { notify('onReady', ''); e.target.playVideo(); },
+                onStateChange: function (e) { notify('onState', e.data); },
+                onError: function (e) { notify('onError', e.data); }
+            }
+        });
+    }
+    var tag = document.createElement('script');
+    tag.src = 'https://www.youtube.com/iframe_api';
+    document.head.appendChild(tag);
+</script>
+</body>
+</html>

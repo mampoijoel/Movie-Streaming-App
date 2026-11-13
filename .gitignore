@@ -1,0 +1,14 @@
+target/
+.idea/
+*.iml
+.vscode/
+.classpath
+.project
+.settings/
+*.class
+bin/
+javafx-sdk/*
+!javafx-sdk/README.txt
+.vscode/*
+!.vscode/settings.json
+!.vscode/launch.json
