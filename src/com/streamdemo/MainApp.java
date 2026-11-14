@@ -58,14 +58,7 @@ public class MainApp extends Application {
         scene.addEventFilter(KeyEvent.KEY_PRESSED, e -> {
             if (player.isOpen()) {
                 if (e.getCode() == KeyCode.ESCAPE) {
-                    if (stage.isFullScreen()) {
-                        stage.setFullScreen(false);
-                    } else {
-                        player.close();
-                    }
-                    e.consume();
-                } else if (e.getCode() == KeyCode.SPACE) {
-                    player.togglePlayback();
+                    player.close();
                     e.consume();
                 }
             }
@@ -79,8 +72,8 @@ public class MainApp extends Application {
     }
 
     private void play(Movie movie) {
-        // Opens the internal custom player (Option 2)
-        player.open(movie);
+        // THIS IS THE FIX: It opens the YouTube trailer in your default web browser
+        getHostServices().showDocument(movie.watchUrl());
     }
 
     @Override
