@@ -2,19 +2,21 @@ package com.streamdemo.model;
 
 import java.util.List;
 
-/**
- * Hard-coded demo catalogue: 3 genres x 8 movies.
- *
- * To swap a trailer, replace the YouTube id (the text after "watch?v=" in the
- * trailer's URL). If a trailer ever refuses to play, the owner may have
- * disabled embedding - pick another upload of the same trailer.
- */
 public final class Catalog {
 
-    private Catalog() {
-    }
+    private static final List<Category> CATEGORIES = build();
+
+    private Catalog() {}
 
     public static List<Category> load() {
+        return CATEGORIES;
+    }
+
+    public static Movie featured() {
+        return CATEGORIES.get(1).movies().get(0); // Inception
+    }
+
+    private static List<Category> build() {
         return List.of(
                 new Category("Action", List.of(
                         new Movie("The Dark Knight", 2008, "EXeTwQWrcwY", "Batman faces the Joker in a battle for Gotham's soul."),
@@ -27,7 +29,8 @@ public final class Catalog {
                         new Movie("Black Panther", 2018, "xjDjIWPwcPU", "T'Challa rises as king of Wakanda.")
                 )),
                 new Category("Sci-Fi", List.of(
-                        new Movie("Inception", 2010, "YoHD9XEInc0", "A thief steals secrets from inside people's dreams."),
+                        // Swapped Inception ID to a working embeddable trailer
+                        new Movie("Inception", 2010, "8hP9D6kZseM", "A thief steals secrets from inside people's dreams."),
                         new Movie("Interstellar", 2014, "zSWdZVtXT7E", "Explorers travel through a wormhole to save humanity."),
                         new Movie("The Matrix", 1999, "vKQi3bBA1y8", "A hacker discovers the truth about his reality."),
                         new Movie("Blade Runner 2049", 2017, "gCcx85zbxz4", "A new blade runner uncovers a long-buried secret."),
@@ -47,10 +50,5 @@ public final class Catalog {
                         new Movie("Up", 2009, "ORFWdXl_zJ4", "An old man ties balloons to his house and flies away.")
                 ))
         );
-    }
-
-    /** The movie shown in the big banner at the top of the home screen. */
-    public static Movie featured() {
-        return load().get(1).movies().get(0); // Inception
     }
 }

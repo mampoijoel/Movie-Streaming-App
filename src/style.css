@@ -1,7 +1,7 @@
 /* Dark Netflix-style theme: transparent scroll panes and slim dark scrollbars */
 
 .root {
-    -fx-font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    -fx-font-family: "System", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
     -fx-base: #141414;
     -fx-background: #141414;
 }
@@ -25,9 +25,18 @@
     -fx-pref-width: 10;
 }
 
+.scroll-bar:horizontal {
+    -fx-background-color: #141414;
+    -fx-pref-height: 10;
+}
+
 .scroll-bar .track {
     -fx-background-color: transparent;
     -fx-border-color: transparent;
+}
+
+.scroll-bar .track-background {
+    -fx-background-color: transparent;
 }
 
 .scroll-bar .thumb {

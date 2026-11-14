@@ -9,7 +9,6 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.StrokeLineCap;
 import javafx.scene.shape.StrokeLineJoin;
 
-/** Vector icons drawn with shapes, so the app needs no icon images or emoji fonts. */
 public final class Icons {
 
     public static final Color NETFLIX_RED = Color.web("#e50914");

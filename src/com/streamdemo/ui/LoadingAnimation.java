@@ -12,10 +12,6 @@ import javafx.scene.shape.Polygon;
 import javafx.scene.shape.StrokeLineCap;
 import javafx.util.Duration;
 
-/**
- * Our own "trailer is loading" animation (no stock ProgressIndicator):
- * two dashed rings spinning in opposite directions around a pulsing play symbol.
- */
 public class LoadingAnimation extends StackPane {
 
     private final RotateTransition outerSpin;
@@ -59,7 +55,6 @@ public class LoadingAnimation extends StackPane {
         glowFade.setCycleCount(Animation.INDEFINITE);
     }
 
-    /** A circle outline drawn as a dashed stroke so it looks like an arc but rotates about its true centre. */
     private static Circle ring(double radius, double visibleFraction, Color color, double width) {
         Circle c = new Circle(radius);
         c.setFill(Color.TRANSPARENT);

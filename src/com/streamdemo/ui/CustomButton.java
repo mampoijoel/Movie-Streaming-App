@@ -11,11 +11,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.util.Duration;
 
-/**
- * Our own button. It is NOT a javafx.scene.control.Button: it is a StackPane that
- * holds an optional icon + a Label and reacts to mouse events itself
- * (hover colour, press-and-release scaling, click sound).
- */
 public class CustomButton extends StackPane {
 
     public enum Kind { PRIMARY, SECONDARY, GHOST }
@@ -31,7 +26,7 @@ public class CustomButton extends StackPane {
         this.onAction = onAction;
 
         content.setAlignment(Pos.CENTER);
-        content.setMouseTransparent(true); // the StackPane itself receives the mouse events
+        content.setMouseTransparent(true);
         label.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
         update(text, icon);
         getChildren().add(content);
@@ -65,7 +60,6 @@ public class CustomButton extends StackPane {
         this(text, null, kind, onAction);
     }
 
-    /** Changes the text and icon (used by the play/pause toggle). */
     public void update(String text, Node icon) {
         label.setText(text);
         content.getChildren().clear();
@@ -75,6 +69,10 @@ public class CustomButton extends StackPane {
         if (text != null && !text.isEmpty()) {
             content.getChildren().add(label);
         }
+    }
+
+    public String getLabelText() {
+        return label.getText();
     }
 
     public void setOnAction(Runnable onAction) {

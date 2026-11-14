@@ -19,7 +19,6 @@ import javafx.scene.shape.Rectangle;
 
 import java.util.function.Consumer;
 
-/** Big featured-movie banner at the top of the home screen. */
 public class HeroBanner extends StackPane {
 
     public HeroBanner(Movie movie, ObservableDoubleValue windowWidth, Consumer<Movie> onPlay) {
@@ -35,14 +34,21 @@ public class HeroBanner extends StackPane {
         clip.heightProperty().bind(heightProperty());
         setClip(clip);
 
-        // backdrop picture (falls back to a smaller image if the HD one does not exist)
         Image backdrop = new Image(movie.heroUrl(), true);
         ImageView picture = new ImageView(backdrop);
         picture.setPreserveRatio(true);
         picture.fitWidthProperty().bind(widthProperty());
+
+        Image fallback = new Image(movie.fallbackHeroUrl(), true);
+        fallback.errorProperty().addListener((obs, was, isError) -> {
+            if (isError) {
+                picture.setImage(null);
+                setStyle("-fx-background-color: #1a1a1a;");
+            }
+        });
         backdrop.errorProperty().addListener((obs, was, isError) -> {
             if (isError) {
-                picture.setImage(new Image(movie.fallbackHeroUrl(), true));
+                picture.setImage(fallback);
             }
         });
 

@@ -4,22 +4,25 @@ import com.streamdemo.audio.SoundManager;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 
-/** Top bar: logo, jump-to-category links and the sound on/off switch. */
+/** Top bar: logo, jump-to-category links, search bar, and the sound on/off switch. */
 public class NavBar extends HBox {
 
-    public NavBar(List<String> categoryNames, Runnable onHome, IntConsumer onCategory) {
+    public NavBar(List<String> categoryNames, Runnable onHome, IntConsumer onCategory, Consumer<String> onSearch) {
         setAlignment(Pos.CENTER_LEFT);
         setSpacing(8);
         setPadding(new Insets(12, 48, 12, 48));
         setStyle("-fx-background-color: linear-gradient(to bottom, #000000, #141414);");
 
+        // --- Logo ---
         Label logoRed = new Label("STREAM");
         logoRed.setStyle("-fx-text-fill: #e50914; -fx-font-size: 30px; -fx-font-weight: 900;");
         Label logoWhite = new Label("BOX");
@@ -28,6 +31,7 @@ public class NavBar extends HBox {
         logo.setPadding(new Insets(0, 24, 0, 0));
         getChildren().add(logo);
 
+        // --- Category Navigation Buttons ---
         getChildren().add(new CustomButton("Home", CustomButton.Kind.GHOST, onHome));
         for (int i = 0; i < categoryNames.size(); i++) {
             final int index = i;
@@ -35,10 +39,20 @@ public class NavBar extends HBox {
                     () -> onCategory.accept(index)));
         }
 
+        // --- Spacer ---
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
         getChildren().add(spacer);
 
+        // --- Search Bar (NEW) ---
+        TextField searchField = new TextField();
+        searchField.setPromptText("Search movies...");
+        searchField.setStyle("-fx-background-color: #333333; -fx-text-fill: white; -fx-prompt-text-fill: #888888; -fx-background-radius: 4; -fx-padding: 6 12; -fx-font-size: 14px;");
+        // Wire the text field to the onSearch callback passed from MainApp
+        searchField.textProperty().addListener((obs, oldVal, newVal) -> onSearch.accept(newVal.toLowerCase().trim()));
+        getChildren().add(searchField);
+
+        // --- Sound Toggle ---
         CustomButton sound = new CustomButton("Sound: ON", CustomButton.Kind.GHOST, null);
         sound.setOnAction(() -> {
             SoundManager.setMuted(!SoundManager.isMuted());

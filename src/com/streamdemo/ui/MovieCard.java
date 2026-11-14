@@ -21,13 +21,6 @@ import javafx.util.Duration;
 
 import java.util.function.Consumer;
 
-/**
- * One movie: a 16:9 thumbnail with the title and year underneath.
- *
- * Hover effect (all at once): the card grows, a red glow appears, the picture
- * slowly zooms, a dark overlay with a play badge fades in, the title brightens
- * and a soft tick sound plays.
- */
 public class MovieCard extends VBox {
 
     private static final String TITLE_NORMAL = "-fx-text-fill: #b3b3b3; -fx-font-size: 15px; -fx-font-weight: bold;";
@@ -42,11 +35,10 @@ public class MovieCard extends VBox {
 
         DoubleBinding height = width.multiply(9.0 / 16.0);
 
-        // --- thumbnail -----------------------------------------------------------------
         Region placeholder = new Region();
         placeholder.setStyle("-fx-background-color: #262626;");
 
-        ImageView image = new ImageView(new Image(movie.thumbnailUrl(), true)); // loads in background
+        ImageView image = new ImageView(new Image(movie.thumbnailUrl(), true));
         image.setPreserveRatio(false);
         image.fitWidthProperty().bind(width);
         image.fitHeightProperty().bind(height);
@@ -73,9 +65,8 @@ public class MovieCard extends VBox {
         clip.heightProperty().bind(height);
         frame.setClip(clip);
 
-        StackPane thumb = new StackPane(frame); // the glow is applied here so it follows the rounded shape
+        StackPane thumb = new StackPane(frame);
 
-        // --- text ----------------------------------------------------------------------
         Label title = new Label(movie.title());
         title.setStyle(TITLE_NORMAL);
         title.setMaxWidth(Double.MAX_VALUE);
@@ -84,7 +75,6 @@ public class MovieCard extends VBox {
 
         getChildren().addAll(thumb, title, year);
 
-        // --- hover animation -----------------------------------------------------------
         ScaleTransition grow = new ScaleTransition(Duration.millis(180), this);
         ScaleTransition zoom = new ScaleTransition(Duration.millis(600), image);
         FadeTransition fade = new FadeTransition(Duration.millis(180), overlay);
@@ -92,7 +82,7 @@ public class MovieCard extends VBox {
         glow.setSpread(0.12);
 
         setOnMouseEntered(e -> {
-            setViewOrder(-1); // draw above neighbouring cards without re-ordering the layout
+            setViewOrder(-1);
             grow.stop();
             grow.setToX(1.1);
             grow.setToY(1.1);
@@ -107,6 +97,13 @@ public class MovieCard extends VBox {
             thumb.setEffect(glow);
             title.setStyle(TITLE_HOVER);
             SoundManager.play(SoundManager.Effect.HOVER);
+
+            ScaleTransition badgePulse = new ScaleTransition(Duration.millis(400), badge);
+            badgePulse.setFromX(1.0); badgePulse.setFromY(1.0);
+            badgePulse.setToX(1.15); badgePulse.setToY(1.15);
+            badgePulse.setAutoReverse(true);
+            badgePulse.setCycleCount(2); 
+            badgePulse.play();
         });
         setOnMouseExited(e -> {
             setViewOrder(0);

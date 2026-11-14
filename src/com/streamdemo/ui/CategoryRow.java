@@ -25,18 +25,13 @@ import javafx.util.Duration;
 
 import java.util.function.Consumer;
 
-/**
- * A labelled genre row. Exactly {@value #VISIBLE} thumbnails fit in the viewport
- * (card width is calculated from the window width); the remaining movies are
- * reached by the arrow buttons, a horizontal trackpad swipe or Shift + mouse wheel.
- */
 public class CategoryRow extends VBox {
 
     private static final int VISIBLE = 5;
     private static final double GAP = 16;
-    private static final double H_PAD = 48;     // side padding; also leaves room for the arrows
-    private static final double V_PAD = 24;     // room for the hover "grow" effect
-    private static final double META_HEIGHT = 54; // title + year under each thumbnail
+    private static final double H_PAD = 48;
+    private static final double V_PAD = 24;
+    private static final double META_HEIGHT = 54;
 
     private final ScrollPane scroller = new ScrollPane();
     private final HBox track = new HBox(GAP);
@@ -46,7 +41,6 @@ public class CategoryRow extends VBox {
     public CategoryRow(Category category, Consumer<Movie> onSelect) {
         setPadding(new Insets(14, 0, 0, 0));
 
-        // --- header: red accent bar + label + count -------------------------------------
         Region accent = new Region();
         accent.setMinSize(4, 24);
         accent.setPrefSize(4, 24);
@@ -60,7 +54,6 @@ public class CategoryRow extends VBox {
         header.setAlignment(Pos.CENTER_LEFT);
         header.setPadding(new Insets(0, H_PAD, 0, H_PAD));
 
-        // --- thumbnails -----------------------------------------------------------------
         cardWidth = Bindings.createDoubleBinding(
                 () -> Math.max(140, (scroller.getWidth() - 2 * H_PAD - (VISIBLE - 1) * GAP) / VISIBLE),
                 scroller.widthProperty());
@@ -82,7 +75,6 @@ public class CategoryRow extends VBox {
         scroller.maxHeightProperty().bind(rowHeight);
         scroller.addEventFilter(ScrollEvent.SCROLL, this::handleHorizontalScroll);
 
-        // --- arrows (visible only while the mouse is over the row) ----------------------
         StackPane left = arrow(true);
         StackPane right = arrow(false);
         StackPane stack = new StackPane(scroller, left, right);
@@ -96,7 +88,6 @@ public class CategoryRow extends VBox {
         getChildren().addAll(header, stack);
     }
 
-    /** Builds a custom arrow button (a styled pane with a drawn chevron - no Button class). */
     private StackPane arrow(boolean isLeft) {
         Node chevron = isLeft
                 ? Icons.chevronLeft(26, Color.WHITE)
@@ -126,7 +117,6 @@ public class CategoryRow extends VBox {
         return pane;
     }
 
-    /** Smoothly scrolls one "page" (5 thumbnails) to the left or right. */
     private void page(int direction) {
         double max = maxScroll();
         if (max <= 0) {
@@ -143,11 +133,17 @@ public class CategoryRow extends VBox {
         scrollAnimation.play();
     }
 
-    /** Horizontal trackpad swipe / Shift+wheel scrolls the row; vertical wheel still scrolls the page. */
     private void handleHorizontalScroll(ScrollEvent e) {
         double max = maxScroll();
-        if (max > 0 && Math.abs(e.getDeltaX()) > Math.abs(e.getDeltaY())) {
-            double value = scroller.getHvalue() - e.getDeltaX() / max;
+        if (max <= 0) {
+            return;
+        }
+        double delta = e.getDeltaX();
+        if (e.isShiftDown()) {
+            delta = e.getDeltaY(); 
+        }
+        if (Math.abs(delta) > Math.abs(e.getDeltaY()) || e.isShiftDown()) {
+            double value = scroller.getHvalue() - delta / max;
             scroller.setHvalue(Math.max(0, Math.min(1, value)));
             e.consume();
         }

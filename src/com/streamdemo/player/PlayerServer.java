@@ -11,15 +11,6 @@ import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Executors;
 
-/**
- * Tiny local web server that serves the trailer page (resources/player.html).
- *
- * Why? YouTube refuses to play an embedded video when the embedding page has no
- * proper web origin (it shows "Error 153" for file:// pages or inline HTML).
- * Serving the page from http://localhost gives the YouTube iframe a valid origin.
- * The server only listens on the loopback interface and serves nothing but this page.
- * No video data ever passes through it - the video streams from YouTube.
- */
 public final class PlayerServer {
 
     private HttpServer server;
@@ -31,6 +22,9 @@ public final class PlayerServer {
                 throw new IOException("player.html missing from resources");
             }
             template = new String(in.readAllBytes(), StandardCharsets.UTF_8);
+        }
+        if (!template.contains("%VIDEO_ID%")) {
+            throw new IOException("player.html is missing the %VIDEO_ID% placeholder");
         }
         server = HttpServer.create(new InetSocketAddress(InetAddress.getByName("localhost"), 0), 0);
         server.createContext("/player", this::handle);
@@ -48,14 +42,16 @@ public final class PlayerServer {
         }
     }
 
-    /** URL of the page that plays the given YouTube video. */
     public String urlFor(String youtubeId) {
+        if (server == null) {
+            throw new IllegalStateException("PlayerServer has not been started");
+        }
         return "http://localhost:" + server.getAddress().getPort() + "/player?v=" + youtubeId;
     }
 
     private void handle(HttpExchange exchange) throws IOException {
         String id = queryParam(exchange.getRequestURI().getRawQuery(), "v");
-        if (id == null || !id.matches("[A-Za-z0-9_-]{6,20}")) { // never echo unvalidated input
+        if (id == null || !id.matches("[A-Za-z0-9_-]{6,20}")) {
             exchange.sendResponseHeaders(400, -1);
             exchange.close();
             return;

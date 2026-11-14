@@ -11,20 +11,13 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-/**
- * Plays the UI sound effects.
- *
- * The effects are synthesised in code (short sine-wave blips), so the project
- * needs no audio files. Playback happens on a background thread and silently
- * does nothing on machines without an audio device.
- */
 public final class SoundManager {
 
     public enum Effect { HOVER, CLICK, OPEN, CLOSE }
 
     private static final float SAMPLE_RATE = 44_100f;
     private static final AudioFormat FORMAT = new AudioFormat(SAMPLE_RATE, 16, 1, true, false);
-    private static final long HOVER_COOLDOWN_NS = 70_000_000L; // avoid machine-gun hover sounds
+    private static final long HOVER_COOLDOWN_NS = 70_000_000L;
 
     private static final Map<Effect, byte[]> SAMPLES = new EnumMap<>(Effect.class);
     private static final ExecutorService PLAYER = Executors.newSingleThreadExecutor(r -> {
@@ -37,7 +30,6 @@ public final class SoundManager {
     private static long lastHover = 0;
 
     static {
-        // each note = { start frequency Hz, end frequency Hz, duration seconds }
         SAMPLES.put(Effect.HOVER, synth(0.10, new double[]{1500, 1100, 0.035}));
         SAMPLES.put(Effect.CLICK, synth(0.25, new double[]{700, 900, 0.05}, new double[]{1000, 1300, 0.07}));
         SAMPLES.put(Effect.OPEN, synth(0.25,
@@ -74,7 +66,6 @@ public final class SoundManager {
                 });
                 clip.start();
             } catch (Exception | LinkageError ignored) {
-                // no audio device / unsupported line - the app simply stays silent
             }
         });
     }
@@ -87,7 +78,6 @@ public final class SoundManager {
         muted = value;
     }
 
-    /** Builds 16-bit mono PCM for a sequence of frequency-sweeping notes. */
     private static byte[] synth(double volume, double[]... notes) {
         int total = 0;
         for (double[] n : notes) {
